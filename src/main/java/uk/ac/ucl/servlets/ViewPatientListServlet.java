@@ -11,7 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 // The servlet invoked to display a list of patients. Note that this data is just example data,
 // you replace it with your data.
@@ -20,18 +21,41 @@ import java.util.List;
 @WebServlet("/patientList.html")
 public class ViewPatientListServlet extends HttpServlet
 {
-
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
   {
     // Get the data from the model
     Model model = ModelFactory.getModel();
-    List<String> patientNames = model.getPatientNames();
-    // Then add the data to the request object that will be sent to the Java Server Page, so that
-    // the JSP can access the data (a Java data structure).
-    request.setAttribute("patientNames", patientNames);
+
+    String sort = request.getParameter("sort");     //needed for the sort operation
+    String order = request.getParameter("order");
+    List<String> columnNames = Arrays.asList("AGE", "BIRTHDATE", "DEATHDATE", "SSN", "DRIVERS", "PASSPORT", "FIRST", "LAST", "MAIDEN", "RACE", "MARITAL", "ETHNICITY", "BIRTHPLACE", "GENDER", "ADDRESS", "CITY", "STATE", "ZIP");
+
+    List<String> patientThings;
+    List<List<String>> patientIDs;
+
+    if (Objects.equals(sort, "AGE")) {
+      if (order == null) {
+        order = "asc";
+      }
+      Map<String, List<String>> sortedPatients = model.getPatientsSortedByAges(order);
+      patientThings = new ArrayList<>(sortedPatients.keySet()); //to convert the values of the map to a list
+      patientIDs = new ArrayList<>(sortedPatients.values());
+    }
+    else if (sort != null) {
+      Map<String, List<String>> sortedPatients = model.getPatientsSortedByColumn(sort, order);
+      patientThings = new ArrayList<>(sortedPatients.keySet()); //to convert the values of the map to a list
+      patientIDs = new ArrayList<>(sortedPatients.values());
+    }
+    else { //default list display
+      patientThings = model.getPatientNames();
+      patientIDs = model.getPatientIDs().stream().map(Arrays::asList).collect(Collectors.toList());
+    }
+
+    request.setAttribute("patientThings", patientThings);
+    request.setAttribute("patientIDs", patientIDs);
+    request.setAttribute("columnNames", columnNames);
 
     // Invoke the JSP.
-    // A JSP page is actually converted into a Java class, so behind the scenes everything is Java.
     ServletContext context = getServletContext();
     RequestDispatcher dispatch = context.getRequestDispatcher("/patientList.jsp");
     dispatch.forward(request, response);

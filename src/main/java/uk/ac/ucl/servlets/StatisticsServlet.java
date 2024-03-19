@@ -13,16 +13,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-@WebServlet("/ageStatistics.html")
-public class AgeStatisticsServlet extends HttpServlet {
+@WebServlet("/statistics.html")
+public class StatisticsServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        // Get the data from the model
         Model model = ModelFactory.getModel();
+        List<Integer> ages = new ArrayList<> (model.getAllAges());
 
+        request.setAttribute("ages", ages);
 
+        ServletContext context = getServletContext();
+        RequestDispatcher dispatch = context.getRequestDispatcher("/statistics.jsp");
+        dispatch.forward(request, response);
     }
 }

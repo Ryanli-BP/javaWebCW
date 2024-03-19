@@ -2,6 +2,7 @@ package uk.ac.ucl.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 // This class gives access to the model to any other class that needs it.
 // Calling the static method getModel (i.e., ModelFactory.getModel()) returns
@@ -17,11 +18,7 @@ public class ModelFactory
   {
     if (model == null)
     {
-      model = new Model();
-      // Note where the data file is stored in the data directory,
-      // and the pathname to locate it.
-      // The data should be read the file once, not every time the model is accessed!
-      model.readFile("data/patients100.csv");
+      model = new Model("patients100.csv");
     }
     return model;
   }
